@@ -56,7 +56,7 @@ source ~/.zshrc
 Then run it from anywhere:
 
 ```bash
-subrecon
+SubRecon
 ```
 
 ### Option 2: build from source
