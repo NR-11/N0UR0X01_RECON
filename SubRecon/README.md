@@ -1,4 +1,4 @@
-# subrecon
+# SubRecon
 
 An automated subdomain enumeration workflow, written in Go. One binary, a few setup questions, then it runs the full pipeline on its own and hands you back every subdomain file you need.
 
@@ -32,7 +32,7 @@ Go 1.21+ to build. The following tools must be installed and in your `$PATH`:
 
 `github-subdomains` and `gitlab-subdomains` are optional — if you leave their tokens blank, those steps are skipped and the rest of the pipeline still runs.
 
-For subfinder to return a lot more than the default, put your API keys in `~/.config/subfinder/provider-config.yaml` ([format here](https://github.com/projectdiscovery/subfinder#post-installation-instructions)). subrecon checks this file before starting and warns you if it's missing or empty, with a chance to continue anyway.
+For subfinder to return a lot more than the default, put your API keys in `~/.config/subfinder/provider-config.yaml` ([format here](https://github.com/projectdiscovery/subfinder#post-installation-instructions)). SubRecon checks this file before starting and warns you if it's missing or empty, with a chance to continue anyway.
 
 ## Installation
 
@@ -40,7 +40,7 @@ This tool lives inside the [N0UR0X01_RECON](https://github.com/NR-11/N0UR0X01_RE
 
 ### Option 1: go install (recommended)
 
-Installs the `subrecon` binary straight into `$GOPATH/bin` (usually `$HOME/go/bin`), so you can run it from anywhere.
+Installs the `SubRecon` binary straight into `$GOPATH/bin` (usually `$HOME/go/bin`), so you can run it from anywhere.
 
 ```bash
 go install github.com/NR-11/N0UR0X01_RECON/SubRecon@latest
@@ -64,18 +64,18 @@ SubRecon
 ```bash
 git clone https://github.com/NR-11/N0UR0X01_RECON
 cd N0UR0X01_RECON/SubRecon
-go build -o subrecon .
+go build -o SubRecon .
 ```
 
 ```bash
-./subrecon
+./SubRecon
 ```
 
 ## Usage
 
 ```bash
-subrecon        # if installed with go install
-./subrecon      # if built from source
+SubRecon        # if installed with go install
+./SubRecon      # if built from source
 ```
 
 You'll be asked for:
@@ -122,7 +122,7 @@ target.com_h1/
     └── ... (gowitness output)
 ```
 
-At the end, subrecon prints a stats block: how many subdomains each tool returned, and — more importantly — how many of those were genuinely **new** compared to subfinder alone. Use that to decide which tools are worth keeping for a given target.
+At the end, SubRecon prints a stats block: how many subdomains each tool returned, and — more importantly — how many of those were genuinely **new** compared to subfinder alone. Use that to decide which tools are worth keeping for a given target.
 
 ## Quick test
 
@@ -133,7 +133,7 @@ Want to confirm everything works before pointing it at a real target? Use a ligh
 - `hackerone.com` — a wider scope if you want to see the full pipeline return a large, realistic result set.
 
 ```bash
-./subrecon
+./SubRecon
 # Target domain: scanme.nmap.org
 # Platform: test
 ```
@@ -141,5 +141,5 @@ Want to confirm everything works before pointing it at a real target? Use a ligh
 ## Notes
 
 - Every shell step is run exactly as documented in the original recon workflow this is based on — nothing was changed in tool flags or step order, only automated.
-- If a required tool is missing from `$PATH`, subrecon warns you and asks whether to continue; missing optional tools (github/gitlab-subdomains) just get skipped if no token was given.
+- If a required tool is missing from `$PATH`, SubRecon warns you and asks whether to continue; missing optional tools (github/gitlab-subdomains) just get skipped if no token was given.
 - Be mindful of `puredns`'s `--rate-limit` on a weak/limited connection — lower it in the source if needed before building.
