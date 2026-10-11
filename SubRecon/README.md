@@ -50,7 +50,7 @@ go build -o subrecon .
 
 You'll be asked for:
 
-- Target domain (e.g. `wolt.com`)
+- Target domain (e.g. `target.com`)
 - Platform short name (e.g. `h1`) — used to name the output folder `target.com_h1`
 - GitHub token (classic, `public_repo` scope — fine-grained tokens can silently return 0 results)
 - GitLab token
@@ -64,7 +64,7 @@ After that, it runs unattended.
 Everything lands under `<domain>_<platform>/`:
 
 ```
-wolt.com_h1/
+target.com_h1/
 ├── subdomains/
 │   ├── sub_subfinder.txt
 │   ├── sub_github.txt
