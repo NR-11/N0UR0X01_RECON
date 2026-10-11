@@ -31,9 +31,9 @@ import (
 // ---------- config ----------
 
 type Config struct {
-	Domain   string // e.g. wolt.com
+	Domain   string // e.g. target.com
 	Platform string // e.g. h1
-	BaseDir  string // e.g. wolt.com_h1
+	BaseDir  string // e.g. target.com_h1
 
 	SubdomainsDir  string
 	UrlsDir        string
