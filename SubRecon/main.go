@@ -56,7 +56,7 @@ func main() {
 
 	cfg := setup()
 
-	checkRequiredTools()
+	checkRequiredTools(cfg)
 
 	fmt.Println()
 	section("PASSIVE ENUMERATION")
@@ -99,7 +99,7 @@ func main() {
 func setup() Config {
 	var cfg Config
 
-	cfg.Domain = ask("Target domain (e.g. wolt.com): ")
+	cfg.Domain = ask("Target domain (e.g. target.com): ")
 	cfg.Domain = strings.TrimSpace(cfg.Domain)
 	if cfg.Domain == "" {
 		fatal("a target domain is required.")
@@ -170,7 +170,28 @@ func setup() Config {
 	mustDownload("https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt", cfg.ResolversTrustedFile)
 	fmt.Println("[✓] resolvers.txt and resolvers-trusted.txt are up to date.")
 
+	// All commands run with their working directory set to SubdomainsDir, so
+	// every path that points outside of it (resolvers, wordlist, urls,
+	// screenshots) must be absolute — otherwise it gets resolved relative to
+	// SubdomainsDir instead of the directory the program was launched from.
+	absolutize(&cfg.SubdomainsDir)
+	absolutize(&cfg.UrlsDir)
+	absolutize(&cfg.ResolversDir)
+	absolutize(&cfg.WordlistsDir)
+	absolutize(&cfg.ScreenshotsDir)
+	absolutize(&cfg.WordlistFile)
+	absolutize(&cfg.ResolversFile)
+	absolutize(&cfg.ResolversTrustedFile)
+
 	return cfg
+}
+
+func absolutize(path *string) {
+	abs, err := filepath.Abs(*path)
+	if err != nil {
+		fatal("could not resolve absolute path for " + *path + ": " + err.Error())
+	}
+	*path = abs
 }
 
 func checkSubfinderKeys() {
@@ -226,30 +247,67 @@ func hasConfiguredKeys(content string) bool {
 
 // ---------- required tools check ----------
 
-func checkRequiredTools() {
-	tools := []string{"subfinder", "gau", "puredns", "katana", "alterx", "dnsx", "httpx", "gowitness"}
-	optional := map[string]string{
-		"github-subdomains": "github-subdomains",
-		"gitlab-subdomains": "gitlab-subdomains",
+type toolSpec struct {
+	name       string // binary name expected in $PATH
+	installPkg string // `go install` package path, empty if not go-installable
+	needed     bool   // whether this run actually needs it
+}
+
+// checkRequiredTools walks every tool the pipeline can call and, for each one
+// missing from $PATH, asks what to do instead of silently skipping it and
+// letting a later stage fail for an unclear reason.
+func checkRequiredTools(cfg Config) {
+	tools := []toolSpec{
+		{"subfinder", "github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest", true},
+		{"gau", "github.com/lc/gau/v2/cmd/gau@latest", true},
+		{"puredns", "github.com/d3mondev/puredns/v2@latest", true},
+		{"katana", "github.com/projectdiscovery/katana/cmd/katana@latest", true},
+		{"alterx", "github.com/projectdiscovery/alterx/cmd/alterx@latest", true},
+		{"dnsx", "github.com/projectdiscovery/dnsx/cmd/dnsx@latest", true},
+		{"httpx", "github.com/projectdiscovery/httpx/cmd/httpx@latest", true},
+		{"gowitness", "github.com/sensepost/gowitness@latest", true},
+		{"github-subdomains", "github.com/gwen001/github-subdomains@latest", cfg.GithubToken != ""},
+		{"gitlab-subdomains", "github.com/gwen001/gitlab-subdomains@latest", cfg.GitlabToken != ""},
 	}
 
-	var missing []string
 	for _, t := range tools {
-		if _, err := exec.LookPath(t); err != nil {
-			missing = append(missing, t)
+		if !t.needed {
+			continue // no token given for it, so this run doesn't need it at all
 		}
-	}
-	for name := range optional {
-		if _, err := exec.LookPath(name); err != nil {
-			warn(fmt.Sprintf("%s not found in PATH — that step will be skipped if a token was provided.", name))
+		if _, err := exec.LookPath(t.name); err == nil {
+			continue // already installed
 		}
-	}
 
-	if len(missing) > 0 {
-		warn("missing required tools: " + strings.Join(missing, ", "))
-		if !askYesNo("Continue anyway (missing tools will just fail/skip)? [y/N]: ") {
+		warn(t.name + " not found in $PATH.")
+
+		if t.installPkg != "" && askYesNo(fmt.Sprintf("Install it now with 'go install %s'? [y/N]: ", t.installPkg)) {
+			installTool(t)
+		} else if !askYesNo(fmt.Sprintf("Continue WITHOUT %s? Steps that need it will fail. [y/N]: ", t.name)) {
 			fatal("aborted by user.")
 		}
+	}
+}
+
+func installTool(t toolSpec) {
+	fmt.Printf("[*] go install %s ...\n", t.installPkg)
+	cmd := exec.Command("go", "install", t.installPkg)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		warn("install failed: " + err.Error())
+	}
+
+	if _, err := exec.LookPath(t.name); err != nil {
+		warn(t.name + " still not found after install — check that $GOPATH/bin (or $HOME/go/bin) is in your $PATH.")
+		if !askYesNo("Continue without it anyway? [y/N]: ") {
+			fatal("aborted by user.")
+		}
+		return
+	}
+
+	fmt.Println("[✓] " + t.name + " installed.")
+	if t.name == "puredns" {
+		warn("puredns also needs massdns (https://github.com/blechschmidt/massdns) built and in $PATH — go install does not provide it.")
 	}
 }
 
