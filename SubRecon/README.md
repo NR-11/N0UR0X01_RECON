@@ -23,7 +23,7 @@ Go 1.21+ to build. The following tools must be installed and in your `$PATH`:
 | github-subdomains | `go install github.com/gwen001/github-subdomains@latest` |
 | gitlab-subdomains | `go install github.com/gwen001/gitlab-subdomains@latest` |
 | gau | `go install github.com/lc/gau/v2/cmd/gau@latest` |
-| puredns | `go install github.com/d3mondev/puredns/v2@latest` (also needs [massdns](https://github.com/blechschmidt/massdns) built and in PATH) |
+| puredns | `go install github.com/d3mondev/puredns/v2@latest` |
 | katana | `go install github.com/projectdiscovery/katana/cmd/katana@latest` |
 | alterx | `go install github.com/projectdiscovery/alterx/cmd/alterx@latest` |
 | dnsx | `go install github.com/projectdiscovery/dnsx/cmd/dnsx@latest` |
