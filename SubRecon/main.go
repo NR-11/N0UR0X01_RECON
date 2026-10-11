@@ -278,7 +278,7 @@ func passiveEnum(cfg Config) {
 	if cfg.GitlabToken != "" {
 		jobs = append(jobs, job{"gitlab-subdomains", func() {
 			runShell(cfg.SubdomainsDir,
-				fmt.Sprintf(`gitlab-subdomains -d %s -t %s -o sub_gitlab.txt && mv %s.txt sub_gitlab.txt`,
+				fmt.Sprintf(`gitlab-subdomains -d %s -t %s && mv %s.txt sub_gitlab.txt`,
 					cfg.Domain, cfg.GitlabToken, cfg.Domain))
 		}})
 	}
