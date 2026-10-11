@@ -37,8 +37,8 @@ For subfinder to return a lot more than the default, put your API keys in `~/.co
 ## Build
 
 ```bash
-git clone https://github.com/yourname/subrecon
-cd subrecon
+git clone https://github.com/NR-11/N0UR0X01_RECON
+cd N0UR0X01_RECON/SubRecon
 go build -o subrecon .
 ```
 
